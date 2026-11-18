@@ -1,0 +1,35 @@
+name: Publicar só no Facebook (post já publicado no Instagram)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  facebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publicar na Página do Facebook
+        env:
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          FACEBOOK_PAGE_ID: ${{ vars.FACEBOOK_PAGE_ID }}
+        run: python3 publicar.py --publicar --facebook-somente
+
+      - name: Salvar o estado da fila
+        if: always()
+        run: |
+          git config user.name "Luiz Leite Advocacia"
+          git config user.email "358061928+LuizLeiteAdv@users.noreply.github.com"
+          git add fila.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Atualiza a fila de publicações (Facebook)"
+            git push
+          fi
