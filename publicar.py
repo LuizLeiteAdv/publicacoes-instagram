@@ -172,6 +172,14 @@ def main():
                 print(f"ERRO ao acessar a Página do Facebook: {e}", file=sys.stderr)
                 return 1
             print(f"Página do Facebook OK: {pg.get('name')}")
+        try:
+            d = chamar("GET", "debug_token", token, {"input_token": token}).get("data", {})
+            exp = d.get("expires_at", 0)
+            quando = "nunca" if not exp else datetime.fromtimestamp(exp, timezone.utc).strftime("%d/%m/%Y")
+            print(f"Token expira: {quando}. Tipo: {d.get('type')}. Válido: {d.get('is_valid')}")
+            print("Permissões:", ", ".join(sorted(d.get("scopes", []))))
+        except ErroPublicacao as e:
+            print(f"Aviso: não foi possível conferir a validade do token ({e})")
         return 0
 
     houve_erro = False
