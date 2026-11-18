@@ -165,6 +165,13 @@ def main():
             print(f"ERRO na verificação: {e}", file=sys.stderr)
             return 1
         print(f"Conexão OK. Conta do Instagram: @{r.get('username')}")
+        if page_id:
+            try:
+                pg = chamar("GET", page_id, token, {"fields": "name"})
+            except ErroPublicacao as e:
+                print(f"ERRO ao acessar a Página do Facebook: {e}", file=sys.stderr)
+                return 1
+            print(f"Página do Facebook OK: {pg.get('name')}")
         return 0
 
     houve_erro = False
