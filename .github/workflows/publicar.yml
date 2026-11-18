@@ -1,0 +1,38 @@
+name: Publicar no Instagram
+
+on:
+  schedule:
+    # 12:00 UTC = 09:00 em Brasília. Roda a cada 20 minutos até 11:40 (segunda, quarta e sexta).
+    # Cada execução só publica o que está aprovado e com horário vencido.
+    - cron: "0,20,40 12-14 * * 1,3,5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publicar posts aprovados
+        env:
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: python3 publicar.py --publicar
+
+      - name: Salvar o estado da fila
+        if: always()
+        run: |
+          git config user.name "Luiz Leite Advocacia"
+          git config user.email "358061928+LuizLeiteAdv@users.noreply.github.com"
+          git add fila.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Atualiza a fila de publicações"
+            git push
+          fi

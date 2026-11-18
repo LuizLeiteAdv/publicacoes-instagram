@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Publica no Instagram (@dr.luizleite) os posts aprovados da fila.json.
+
+Regras de segurança:
+- Só publica posts com status "aprovado" e horário já vencido.
+- Sem a opção --publicar, apenas simula (nada é enviado ao Instagram).
+- O token nunca é impresso. Ele vem das variáveis de ambiente:
+    INSTAGRAM_TOKEN     token de acesso (Instagram API com login do Instagram)
+    INSTAGRAM_USER_ID   ID da conta profissional do Instagram
+
+Uso:
+    python3 publicar.py                 simulação (dry-run)
+    python3 publicar.py --publicar      publica de verdade
+    python3 publicar.py --id POST_ID    limita a um post da fila
+"""
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parent
+FILA = RAIZ / "fila.json"
+VERSAO = os.environ.get("IG_API_VERSION", "v23.0")
+BASE = f"https://graph.instagram.com/{VERSAO}"
+REPO = os.environ.get("GITHUB_REPOSITORY", "LuizLeiteAdv/publicacoes-instagram")
+URL_MIDIA = os.environ.get(
+    "URL_MIDIA", f"https://raw.githubusercontent.com/{REPO}/main/midia"
+)
+# Não publica automaticamente se o horário combinado já passou há mais que isto.
+TOLERANCIA = timedelta(hours=24)
+
+
+class ErroPublicacao(Exception):
+    pass
+
+
+def chamar(metodo, caminho, token, params=None):
+    params = dict(params or {})
+    params["access_token"] = token
+    dados = urllib.parse.urlencode(params).encode()
+    if metodo == "GET":
+        req = urllib.request.Request(f"{BASE}/{caminho}?{dados.decode()}")
+    else:
+        req = urllib.request.Request(f"{BASE}/{caminho}", data=dados, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        corpo = e.read().decode(errors="replace")
+        try:
+            msg = json.loads(corpo).get("error", {}).get("message", corpo)
+        except ValueError:
+            msg = corpo
+        raise ErroPublicacao(f"HTTP {e.code} em {metodo} {caminho}: {msg}") from None
+    except urllib.error.URLError as e:
+        raise ErroPublicacao(f"Falha de rede em {metodo} {caminho}: {e.reason}") from None
+
+
+def conferir_imagem(url):
+    """Confere se a imagem está acessível publicamente e é JPEG."""
+    req = urllib.request.Request(url, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            tipo = r.headers.get("Content-Type", "")
+    except urllib.error.URLError as e:
+        raise ErroPublicacao(f"Imagem inacessível ({url}): {e}") from None
+    if "jpeg" not in tipo:
+        raise ErroPublicacao(f"Imagem não é JPEG ({tipo}): {url}")
+
+
+def esperar(container, token, tentativas=30):
+    for _ in range(tentativas):
+        r = chamar("GET", container, token, {"fields": "status_code"})
+        status = r.get("status_code")
+        if status == "FINISHED":
+            return
+        if status in ("ERROR", "EXPIRED"):
+            raise ErroPublicacao(f"Contêiner {container} com status {status}")
+        time.sleep(4)
+    raise ErroPublicacao(f"Tempo esgotado esperando o contêiner {container}")
+
+
+def publicar_post(post, ig_id, token):
+    urls = [f"{URL_MIDIA}/{post['id']}/{nome}" for nome in post["imagens"]]
+    for u in urls:
+        conferir_imagem(u)
+    legenda = post["legenda"]
+    if len(urls) == 1:
+        container = chamar(
+            "POST", f"{ig_id}/media", token, {"image_url": urls[0], "caption": legenda}
+        )["id"]
+    else:
+        filhos = []
+        for u in urls:
+            filho = chamar(
+                "POST", f"{ig_id}/media", token,
+                {"image_url": u, "is_carousel_item": "true"},
+            )["id"]
+            esperar(filho, token)
+            filhos.append(filho)
+        container = chamar(
+            "POST", f"{ig_id}/media", token,
+            {"media_type": "CAROUSEL", "children": ",".join(filhos), "caption": legenda},
+        )["id"]
+    esperar(container, token)
+    midia = chamar("POST", f"{ig_id}/media_publish", token, {"creation_id": container})["id"]
+    link = ""
+    try:
+        link = chamar("GET", midia, token, {"fields": "permalink"}).get("permalink", "")
+    except ErroPublicacao:
+        pass
+    return midia, link
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    ap.add_argument("--publicar", action="store_true", help="publica de verdade")
+    ap.add_argument("--id", help="processa apenas este post")
+    args = ap.parse_args()
+
+    fila = json.loads(FILA.read_text(encoding="utf-8"))
+    agora = datetime.now(timezone.utc)
+    token = os.environ.get("INSTAGRAM_TOKEN", "")
+    ig_id = os.environ.get("INSTAGRAM_USER_ID", "")
+    if args.publicar and not (token and ig_id):
+        print("ERRO: defina INSTAGRAM_TOKEN e INSTAGRAM_USER_ID.", file=sys.stderr)
+        return 2
+
+    houve_erro = False
+    for post in fila["posts"]:
+        if args.id and post["id"] != args.id:
+            continue
+        if post["status"] != "aprovado":
+            print(f"[{post['id']}] ignorado (status: {post['status']})")
+            continue
+        quando = datetime.fromisoformat(post["data_hora"])
+        if quando > agora:
+            print(f"[{post['id']}] aguardando o horário {post['data_hora']}")
+            continue
+        if agora - quando > TOLERANCIA:
+            print(f"[{post['id']}] ATRASADO além de 24 horas. Não publicado. Revisar.", file=sys.stderr)
+            houve_erro = True
+            continue
+        if not args.publicar:
+            print(f"[{post['id']}] SIMULAÇÃO: publicaria {len(post['imagens'])} imagem(ns) agora.")
+            continue
+        try:
+            midia, link = publicar_post(post, ig_id, token)
+        except ErroPublicacao as e:
+            post["status"] = "erro"
+            post["erro"] = str(e)
+            print(f"[{post['id']}] ERRO: {e}", file=sys.stderr)
+            houve_erro = True
+        else:
+            post["status"] = "publicado"
+            post["publicado_em"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            post["instagram_media_id"] = midia
+            post["link"] = link
+            post.pop("erro", None)
+            print(f"[{post['id']}] PUBLICADO: {link or midia}")
+        FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return 1 if houve_erro else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
