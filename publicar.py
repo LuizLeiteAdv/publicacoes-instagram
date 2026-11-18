@@ -5,7 +5,7 @@ Regras de segurança:
 - Só publica posts com status "aprovado" e horário já vencido.
 - Sem a opção --publicar, apenas simula (nada é enviado ao Instagram).
 - O token nunca é impresso. Ele vem das variáveis de ambiente:
-    INSTAGRAM_TOKEN     token de acesso (Instagram API com login do Instagram)
+    INSTAGRAM_TOKEN     token de acesso da Página (API do Instagram com login do Facebook)
     INSTAGRAM_USER_ID   ID da conta profissional do Instagram
 
 Uso:
@@ -26,8 +26,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 FILA = RAIZ / "fila.json"
-VERSAO = os.environ.get("IG_API_VERSION", "v23.0")
-BASE = f"https://graph.instagram.com/{VERSAO}"
+VERSAO = os.environ.get("IG_API_VERSION", "v27.0")
+# Login do Facebook: token da Página, endereço graph.facebook.com.
+BASE = os.environ.get("IG_API_BASE", "https://graph.facebook.com") + f"/{VERSAO}"
 REPO = os.environ.get("GITHUB_REPOSITORY", "LuizLeiteAdv/publicacoes-instagram")
 URL_MIDIA = os.environ.get(
     "URL_MIDIA", f"https://raw.githubusercontent.com/{REPO}/main/midia"
@@ -122,6 +123,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--publicar", action="store_true", help="publica de verdade")
     ap.add_argument("--id", help="processa apenas este post")
+    ap.add_argument("--verificar", action="store_true",
+                    help="só confere o token e a conta (não publica nada)")
     args = ap.parse_args()
 
     fila = json.loads(FILA.read_text(encoding="utf-8"))
@@ -131,6 +134,18 @@ def main():
     if args.publicar and not (token and ig_id):
         print("ERRO: defina INSTAGRAM_TOKEN e INSTAGRAM_USER_ID.", file=sys.stderr)
         return 2
+
+    if args.verificar:
+        if not (token and ig_id):
+            print("ERRO: defina INSTAGRAM_TOKEN e INSTAGRAM_USER_ID.", file=sys.stderr)
+            return 2
+        try:
+            r = chamar("GET", ig_id, token, {"fields": "username"})
+        except ErroPublicacao as e:
+            print(f"ERRO na verificação: {e}", file=sys.stderr)
+            return 1
+        print(f"Conexão OK. Conta do Instagram: @{r.get('username')}")
+        return 0
 
     houve_erro = False
     for post in fila["posts"]:
