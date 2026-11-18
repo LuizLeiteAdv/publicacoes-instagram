@@ -119,10 +119,29 @@ def publicar_post(post, ig_id, token):
     return midia, link
 
 
+def publicar_facebook(post, page_id, token):
+    """Publica as mesmas imagens e a legenda na Página do Facebook."""
+    urls = [f"{URL_MIDIA}/{post['id']}/{nome}" for nome in post["imagens"]]
+    legenda = post["legenda"]
+    if len(urls) == 1:
+        r = chamar("POST", f"{page_id}/photos", token,
+                   {"url": urls[0], "caption": legenda, "published": "true"})
+        return r.get("post_id") or r["id"]
+    fotos = []
+    for u in urls:
+        r = chamar("POST", f"{page_id}/photos", token, {"url": u, "published": "false"})
+        fotos.append({"media_fbid": r["id"]})
+    r = chamar("POST", f"{page_id}/feed", token,
+               {"message": legenda, "attached_media": json.dumps(fotos)})
+    return r["id"]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--publicar", action="store_true", help="publica de verdade")
     ap.add_argument("--id", help="processa apenas este post")
+    ap.add_argument("--facebook-somente", action="store_true",
+                    help="publica só na Página do Facebook um post já publicado no Instagram")
     ap.add_argument("--verificar", action="store_true",
                     help="só confere o token e a conta (não publica nada)")
     args = ap.parse_args()
@@ -131,6 +150,7 @@ def main():
     agora = datetime.now(timezone.utc)
     token = os.environ.get("INSTAGRAM_TOKEN", "")
     ig_id = os.environ.get("INSTAGRAM_USER_ID", "")
+    page_id = os.environ.get("FACEBOOK_PAGE_ID", "")
     if args.publicar and not (token and ig_id):
         print("ERRO: defina INSTAGRAM_TOKEN e INSTAGRAM_USER_ID.", file=sys.stderr)
         return 2
@@ -150,6 +170,21 @@ def main():
     houve_erro = False
     for post in fila["posts"]:
         if args.id and post["id"] != args.id:
+            continue
+        if args.facebook_somente:
+            if not (args.publicar and page_id and post["status"] == "publicado"
+                    and not post.get("facebook_post_id")):
+                print(f"[{post['id']}] ignorado no modo Facebook")
+                continue
+            try:
+                post["facebook_post_id"] = publicar_facebook(post, page_id, token)
+                post.pop("facebook_erro", None)
+                print(f"[{post['id']}] FACEBOOK PUBLICADO: {post['facebook_post_id']}")
+            except ErroPublicacao as e:
+                post["facebook_erro"] = str(e)
+                print(f"[{post['id']}] ERRO no Facebook: {e}", file=sys.stderr)
+                houve_erro = True
+            FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             continue
         if post["status"] != "aprovado":
             print(f"[{post['id']}] ignorado (status: {post['status']})")
@@ -179,6 +214,14 @@ def main():
             post["link"] = link
             post.pop("erro", None)
             print(f"[{post['id']}] PUBLICADO: {link or midia}")
+            if page_id and post.get("facebook", True):
+                try:
+                    post["facebook_post_id"] = publicar_facebook(post, page_id, token)
+                    print(f"[{post['id']}] FACEBOOK PUBLICADO: {post['facebook_post_id']}")
+                except ErroPublicacao as e:
+                    post["facebook_erro"] = str(e)
+                    print(f"[{post['id']}] ERRO no Facebook: {e}", file=sys.stderr)
+                    houve_erro = True
         FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 1 if houve_erro else 0
 
