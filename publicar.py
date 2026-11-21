@@ -136,12 +136,68 @@ def publicar_facebook(post, page_id, token):
     return r["id"]
 
 
+def publicar_stories_instagram(post, ig_id, token):
+    """Publica cada arte vertical (campo "stories") como um Story do Instagram.
+
+    Os IDs já publicados ficam em post["stories_instagram"], para que uma nova
+    tentativa continue de onde parou, sem repetir Story.
+    """
+    ids = post.setdefault("stories_instagram", [])
+    for nome in post.get("stories", [])[len(ids):]:
+        url = f"{URL_MIDIA}/{post['id']}/{nome}"
+        conferir_imagem(url)
+        container = chamar(
+            "POST", f"{ig_id}/media", token, {"media_type": "STORIES", "image_url": url}
+        )["id"]
+        esperar(container, token)
+        ids.append(chamar("POST", f"{ig_id}/media_publish", token, {"creation_id": container})["id"])
+    return ids
+
+
+def publicar_stories_facebook(post, page_id, token):
+    """Publica as mesmas artes verticais como Stories da Página do Facebook."""
+    ids = post.setdefault("stories_facebook", [])
+    for nome in post.get("stories", [])[len(ids):]:
+        url = f"{URL_MIDIA}/{post['id']}/{nome}"
+        foto = chamar("POST", f"{page_id}/photos", token, {"url": url, "published": "false"})["id"]
+        r = chamar("POST", f"{page_id}/photo_stories", token, {"photo_id": foto})
+        ids.append(r.get("post_id") or foto)
+    return ids
+
+
+def publicar_stories(post, ig_id, page_id, token):
+    """Publica os Stories do post no Instagram e no Facebook. Retorna True se houve erro."""
+    erro = False
+    total = len(post.get("stories", []))
+    if len(post.get("stories_instagram", [])) < total:
+        try:
+            publicar_stories_instagram(post, ig_id, token)
+            print(f"[{post['id']}] STORIES INSTAGRAM PUBLICADOS: {total}")
+        except ErroPublicacao as e:
+            post["stories_erro"] = f"Instagram: {e}"
+            print(f"[{post['id']}] ERRO nos Stories do Instagram: {e}", file=sys.stderr)
+            erro = True
+    if page_id and post.get("facebook", True) and len(post.get("stories_facebook", [])) < total:
+        try:
+            publicar_stories_facebook(post, page_id, token)
+            print(f"[{post['id']}] STORIES FACEBOOK PUBLICADOS: {total}")
+        except ErroPublicacao as e:
+            post["stories_erro"] = f"Facebook: {e}"
+            print(f"[{post['id']}] ERRO nos Stories do Facebook: {e}", file=sys.stderr)
+            erro = True
+    if not erro:
+        post.pop("stories_erro", None)
+    return erro
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--publicar", action="store_true", help="publica de verdade")
     ap.add_argument("--id", help="processa apenas este post")
     ap.add_argument("--facebook-somente", action="store_true",
                     help="publica só na Página do Facebook um post já publicado no Instagram")
+    ap.add_argument("--stories-somente", action="store_true",
+                    help="publica só os Stories de um post já publicado que ainda não os tem")
     ap.add_argument("--verificar", action="store_true",
                     help="só confere o token e a conta (não publica nada)")
     args = ap.parse_args()
@@ -201,6 +257,13 @@ def main():
                 houve_erro = True
             FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             continue
+        if args.stories_somente:
+            if not (args.publicar and post["status"] == "publicado" and post.get("stories")):
+                print(f"[{post['id']}] ignorado no modo Stories")
+                continue
+            houve_erro |= publicar_stories(post, ig_id, page_id, token)
+            FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            continue
         if post["status"] != "aprovado":
             print(f"[{post['id']}] ignorado (status: {post['status']})")
             continue
@@ -237,6 +300,8 @@ def main():
                     post["facebook_erro"] = str(e)
                     print(f"[{post['id']}] ERRO no Facebook: {e}", file=sys.stderr)
                     houve_erro = True
+            if post.get("stories"):
+                houve_erro |= publicar_stories(post, ig_id, page_id, token)
         FILA.write_text(json.dumps(fila, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 1 if houve_erro else 0
 
