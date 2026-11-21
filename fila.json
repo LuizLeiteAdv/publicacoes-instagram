@@ -54,6 +54,56 @@
         "1851086516551855",
         "1478493580954733"
       ]
+    },
+    {
+      "id": "2026-11-23-inventario-em-cartorio",
+      "data_hora": "2026-11-23T09:00:00-03:00",
+      "status": "aprovado",
+      "tipo": "carrossel didático",
+      "tema": "Inventário em cartório",
+      "imagens": [
+        "01.jpg",
+        "02.jpg",
+        "03.jpg",
+        "04.jpg",
+        "05.jpg"
+      ],
+      "stories": [
+        "s01.jpg",
+        "s02.jpg",
+        "s03.jpg",
+        "s04.jpg",
+        "s05.jpg"
+      ],
+      "legenda": "Inventário só pode ser feito na Justiça? Nem sempre.\n\nEm alguns casos, a partilha dos bens de quem faleceu pode ser feita em cartório, por escritura pública, com a assistência de advogado.\n\nEm regra, isso exige consenso entre os herdeiros. Desde 2024, a regra do Conselho Nacional de Justiça também admite o cartório quando há herdeiro menor ou incapaz, com parecer favorável do Ministério Público.\n\nCada família tem uma situação diferente. Procure um advogado imobiliário de confiança para analisar o seu caso.\n\n#inventario #direitoimobiliario #heranca #cartorio"
+    },
+    {
+      "id": "2026-11-25-doacao-de-imovel",
+      "data_hora": "2026-11-25T09:00:00-03:00",
+      "status": "aprovado",
+      "tipo": "checklist",
+      "tema": "Doação de imóvel em vida",
+      "imagens": [
+        "01.jpg"
+      ],
+      "stories": [
+        "s01.jpg"
+      ],
+      "legenda": "Doar um imóvel para os filhos ainda em vida pode ser uma forma de organizar o patrimônio. Mas exige cuidado.\n\nVeja 4 pontos importantes:\n\n1. A doação de imóvel é feita por escritura pública e só se conclui com o registro na matrícula, no Registro de Imóveis.\n\n2. Quem quer continuar usando o imóvel pode reservar o usufruto vitalício. Com o falecimento do doador, a propriedade plena se consolida no donatário.\n\n3. A doação não pode ultrapassar a parte que o doador poderia deixar em testamento. O excesso é nulo, e herdeiros prejudicados podem questionar.\n\n4. A escritura deve esclarecer se a doação é adiantamento da herança, para evitar conflitos entre os herdeiros no futuro inventário.\n\nCada família tem uma realidade. Antes de doar, procure um advogado imobiliário de confiança para analisar o seu caso.\n\n#planejamentosucessorio #doacaodeimovel #direitoimobiliario #usufruto"
+    },
+    {
+      "id": "2026-11-27-due-diligence",
+      "data_hora": "2026-11-27T09:00:00-03:00",
+      "status": "aprovado",
+      "tipo": "checklist",
+      "tema": "Due diligence na compra",
+      "imagens": [
+        "01.jpg"
+      ],
+      "stories": [
+        "s01.jpg"
+      ],
+      "legenda": "Vai comprar um imóvel? Antes de assinar, confira estes 4 itens:\n\n1. Matrícula atualizada, emitida pelo Registro de Imóveis.\n2. Certidões do vendedor e do cônjuge, para verificar ações e dívidas.\n3. IPTU e condomínio em dia, para não herdar débitos.\n4. Estado civil e documentos do vendedor, para confirmar quem pode vender.\n\nEssa análise se chama due diligence e reduz o risco de prejuízo.\n\nNa dúvida, consulte um advogado imobiliário de confiança.\n\n#duediligence #comprardeimovel #direitoimobiliario #segurancajuridica"
     }
   ]
 }
