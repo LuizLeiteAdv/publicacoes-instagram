@@ -167,27 +167,39 @@ def publicar_stories_facebook(post, page_id, token):
 
 def publicar_stories(post, ig_id, page_id, token):
     """Publica os Stories do post no Instagram e no Facebook. Retorna True se houve erro."""
-    erro = False
+    # Regra do Luiz (21/11/2026): nenhum Story é publicado se o post desse Story falhou.
+    # Cada rede segue a sua própria regra, e a falha de uma não bloqueia a outra.
+    erros = []
     total = len(post.get("stories", []))
     if len(post.get("stories_instagram", [])) < total:
-        try:
-            publicar_stories_instagram(post, ig_id, token)
-            print(f"[{post['id']}] STORIES INSTAGRAM PUBLICADOS: {total}")
-        except ErroPublicacao as e:
-            post["stories_erro"] = f"Instagram: {e}"
-            print(f"[{post['id']}] ERRO nos Stories do Instagram: {e}", file=sys.stderr)
-            erro = True
+        if not post.get("instagram_media_id"):
+            msg = "Stories do Instagram não publicados: o post do Instagram não foi publicado."
+            erros.append(msg)
+            print(f"[{post['id']}] {msg}", file=sys.stderr)
+        else:
+            try:
+                publicar_stories_instagram(post, ig_id, token)
+                print(f"[{post['id']}] STORIES INSTAGRAM PUBLICADOS: {total}")
+            except ErroPublicacao as e:
+                erros.append(f"Instagram: {e}")
+                print(f"[{post['id']}] ERRO nos Stories do Instagram: {e}", file=sys.stderr)
     if page_id and post.get("facebook", True) and len(post.get("stories_facebook", [])) < total:
-        try:
-            publicar_stories_facebook(post, page_id, token)
-            print(f"[{post['id']}] STORIES FACEBOOK PUBLICADOS: {total}")
-        except ErroPublicacao as e:
-            post["stories_erro"] = f"Facebook: {e}"
-            print(f"[{post['id']}] ERRO nos Stories do Facebook: {e}", file=sys.stderr)
-            erro = True
-    if not erro:
+        if not post.get("facebook_post_id"):
+            msg = "Stories do Facebook não publicados: o post do Facebook não foi publicado."
+            erros.append(msg)
+            print(f"[{post['id']}] {msg}", file=sys.stderr)
+        else:
+            try:
+                publicar_stories_facebook(post, page_id, token)
+                print(f"[{post['id']}] STORIES FACEBOOK PUBLICADOS: {total}")
+            except ErroPublicacao as e:
+                erros.append(f"Facebook: {e}")
+                print(f"[{post['id']}] ERRO nos Stories do Facebook: {e}", file=sys.stderr)
+    if erros:
+        post["stories_erro"] = " | ".join(erros)
+    else:
         post.pop("stories_erro", None)
-    return erro
+    return bool(erros)
 
 
 def main():
