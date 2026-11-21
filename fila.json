@@ -18,7 +18,7 @@
     {
       "id": "2026-11-21-usucapiao-extrajudicial",
       "data_hora": "2026-11-21T13:30:09-03:00",
-      "status": "erro",
+      "status": "aprovado",
       "tipo": "carrossel didático",
       "tema": "Usucapião extrajudicial",
       "imagens": [
@@ -28,8 +28,7 @@
         "04.jpg",
         "05.jpg"
       ],
-      "legenda": "Você sabia que é possível regularizar um imóvel por usucapião sem entrar com ação na Justiça?\n\nA usucapião extrajudicial é feita no Registro de Imóveis, com a assistência de um advogado.\n\nMas existem requisitos. É preciso comprovar posse mansa e contínua pelo prazo previsto em lei. Também é necessária a concordância dos envolvidos.\n\nQuando não há acordo, o caminho pode ser outro.\n\nCada caso tem as suas particularidades. Por isso, procure um advogado imobiliário de confiança para analisar a sua situação antes de qualquer decisão.\n\n#usucapiao #direitoimobiliario #regularizacaodeimovel #registrodeimoveis",
-      "erro": "HTTP 400 em POST 17841447083895990/media_publish: Media ID is not available"
+      "legenda": "Você sabia que é possível regularizar um imóvel por usucapião sem entrar com ação na Justiça?\n\nA usucapião extrajudicial é feita no Registro de Imóveis, com a assistência de um advogado.\n\nMas existem requisitos. É preciso comprovar posse mansa e contínua pelo prazo previsto em lei. Também é necessária a concordância dos envolvidos.\n\nQuando não há acordo, o caminho pode ser outro.\n\nCada caso tem as suas particularidades. Por isso, procure um advogado imobiliário de confiança para analisar a sua situação antes de qualquer decisão.\n\n#usucapiao #direitoimobiliario #regularizacaodeimovel #registrodeimoveis"
     }
   ]
 }
