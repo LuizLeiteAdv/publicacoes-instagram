@@ -80,15 +80,20 @@
       "instagram_media_id": "17917178097559614",
       "link": "https://www.instagram.com/p/DgFbEcRjpQP/",
       "facebook_post_id": "106057248248373_1506412108217952",
-      "stories_instagram": [],
+      "stories_instagram": [
+        "18105753374545103",
+        "18000539724102066",
+        "18656103007054282",
+        "18117655472336815",
+        "18097415681663435"
+      ],
       "stories_facebook": [
         "1866686297701042",
         "2181784092723806",
         "29740128148924298",
         "4759816240920420",
         "1188076580332017"
-      ],
-      "stories_erro": "Instagram: Imagem inacessível (https://raw.githubusercontent.com/LuizLeiteAdv/publicacoes-instagram/main/midia/2026-11-23-inventario-em-cartorio/s01.jpg): HTTP Error 503: Backend.max_conn reached"
+      ]
     },
     {
       "id": "2026-11-25-doacao-de-imovel",
