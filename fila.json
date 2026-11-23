@@ -97,7 +97,7 @@
     },
     {
       "id": "2026-11-25-doacao-de-imovel",
-      "data_hora": "2026-11-25T09:00:00-03:00",
+      "data_hora": "2026-11-25T08:00:00-03:00",
       "status": "aprovado",
       "tipo": "checklist",
       "tema": "Doação de imóvel em vida",
@@ -111,7 +111,7 @@
     },
     {
       "id": "2026-11-27-due-diligence",
-      "data_hora": "2026-11-27T09:00:00-03:00",
+      "data_hora": "2026-11-27T08:00:00-03:00",
       "status": "aprovado",
       "tipo": "checklist",
       "tema": "Due diligence na compra",
