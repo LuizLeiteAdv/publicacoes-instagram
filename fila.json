@@ -58,7 +58,7 @@
     {
       "id": "2026-11-23-inventario-em-cartorio",
       "data_hora": "2026-11-23T09:00:00-03:00",
-      "status": "aprovado",
+      "status": "publicado",
       "tipo": "carrossel didático",
       "tema": "Inventário em cartório",
       "imagens": [
@@ -75,7 +75,20 @@
         "s04.jpg",
         "s05.jpg"
       ],
-      "legenda": "Inventário só pode ser feito na Justiça? Nem sempre.\n\nEm alguns casos, a partilha dos bens de quem faleceu pode ser feita em cartório, por escritura pública, com a assistência de advogado.\n\nEm regra, isso exige consenso entre os herdeiros. Desde 2024, a regra do Conselho Nacional de Justiça também admite o cartório quando há herdeiro menor ou incapaz, com parecer favorável do Ministério Público.\n\nCada família tem uma situação diferente. Procure um advogado imobiliário de confiança para analisar o seu caso.\n\n#inventario #direitoimobiliario #heranca #cartorio"
+      "legenda": "Inventário só pode ser feito na Justiça? Nem sempre.\n\nEm alguns casos, a partilha dos bens de quem faleceu pode ser feita em cartório, por escritura pública, com a assistência de advogado.\n\nEm regra, isso exige consenso entre os herdeiros. Desde 2024, a regra do Conselho Nacional de Justiça também admite o cartório quando há herdeiro menor ou incapaz, com parecer favorável do Ministério Público.\n\nCada família tem uma situação diferente. Procure um advogado imobiliário de confiança para analisar o seu caso.\n\n#inventario #direitoimobiliario #heranca #cartorio",
+      "publicado_em": "2026-11-23T12:52:12+00:00",
+      "instagram_media_id": "17917178097559614",
+      "link": "https://www.instagram.com/p/DgFbEcRjpQP/",
+      "facebook_post_id": "106057248248373_1506412108217952",
+      "stories_instagram": [],
+      "stories_facebook": [
+        "1866686297701042",
+        "2181784092723806",
+        "29740128148924298",
+        "4759816240920420",
+        "1188076580332017"
+      ],
+      "stories_erro": "Instagram: Imagem inacessível (https://raw.githubusercontent.com/LuizLeiteAdv/publicacoes-instagram/main/midia/2026-11-23-inventario-em-cartorio/s01.jpg): HTTP Error 503: Backend.max_conn reached"
     },
     {
       "id": "2026-11-25-doacao-de-imovel",
