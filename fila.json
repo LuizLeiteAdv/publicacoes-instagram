@@ -122,7 +122,7 @@
     {
       "id": "2026-11-27-due-diligence",
       "data_hora": "2026-11-27T08:00:00-03:00",
-      "status": "aprovado",
+      "status": "publicado",
       "tipo": "checklist",
       "tema": "Due diligence na compra",
       "imagens": [
@@ -131,7 +131,17 @@
       "stories": [
         "s01.jpg"
       ],
-      "legenda": "Vai comprar um imóvel? Antes de assinar, confira estes 4 itens:\n\n1. Matrícula atualizada, emitida pelo Registro de Imóveis.\n2. Certidões do vendedor e do cônjuge, para verificar ações e dívidas.\n3. IPTU e condomínio em dia, para não herdar débitos.\n4. Estado civil e documentos do vendedor, para confirmar quem pode vender.\n\nEssa análise se chama due diligence e reduz o risco de prejuízo.\n\nNa dúvida, consulte um advogado imobiliário de confiança.\n\n#duediligence #comprardeimovel #direitoimobiliario #segurancajuridica"
+      "legenda": "Vai comprar um imóvel? Antes de assinar, confira estes 4 itens:\n\n1. Matrícula atualizada, emitida pelo Registro de Imóveis.\n2. Certidões do vendedor e do cônjuge, para verificar ações e dívidas.\n3. IPTU e condomínio em dia, para não herdar débitos.\n4. Estado civil e documentos do vendedor, para confirmar quem pode vender.\n\nEssa análise se chama due diligence e reduz o risco de prejuízo.\n\nNa dúvida, consulte um advogado imobiliário de confiança.\n\n#duediligence #comprardeimovel #direitoimobiliario #segurancajuridica",
+      "publicado_em": "2026-11-27T11:53:52+00:00",
+      "instagram_media_id": "18102982586538642",
+      "link": "https://www.instagram.com/p/DgPnk88DnS7/",
+      "facebook_post_id": "106057248248373_1510622574463572",
+      "stories_instagram": [
+        "17986727333900421"
+      ],
+      "stories_facebook": [
+        "1648844963589116"
+      ]
     }
   ]
 }
